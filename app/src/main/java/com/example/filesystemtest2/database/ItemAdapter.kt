@@ -33,7 +33,10 @@ class itemAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         var imageResource = images[position] //リストを展開
-        Glide.with(context).load(imageResource).into(holder.image) //Glide
+        Glide.with(context)
+            .load(imageResource)
+            .error(android.R.drawable.ic_btn_speak_now)
+            .into(holder.image) //Glide
         holder.itemView.setOnClickListener{
             listener?.invoke(position)      //追加
         }

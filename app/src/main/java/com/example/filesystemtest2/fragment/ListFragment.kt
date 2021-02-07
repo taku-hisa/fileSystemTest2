@@ -27,7 +27,6 @@ class ListFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         realm = Realm.getDefaultInstance() //realmのオープン処理
-
     }
 
     override fun onCreateView(
@@ -45,12 +44,15 @@ class ListFragment : Fragment() {
         val items = realm.where<item>().equalTo("category", category).findAll()
         //画像の読込
         val imageList = mutableListOf<Bitmap>()
-        for(i in items){
-            val bufferedInputStream = BufferedInputStream(context?.openFileInput(i.name))
-            val itemImage = BitmapFactory.decodeStream(bufferedInputStream)
-            bufferedInputStream.close()
-            imageList.add(itemImage)
+        for(i in items) {
+            try { BufferedInputStream(context?.openFileInput(i.name)).use { bufferedInputStream ->
+                val itemImage = BitmapFactory.decodeStream(bufferedInputStream)
+                imageList.add(itemImage)
+                bufferedInputStream.close()
+            }
+            }catch(e : Exception){ println("エラー発生")}
         }
+
         //アルゴリズムの修正が必要
         binding.RecyclerView.apply {
             layoutManager =

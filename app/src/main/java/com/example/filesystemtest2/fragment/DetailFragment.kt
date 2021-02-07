@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.navigation.fragment.navArgs
+import com.bumptech.glide.Glide
 import com.example.filesystemtest2.R
 import com.example.filesystemtest2.database.item
 import com.example.filesystemtest2.databinding.FragmentDetailBinding
@@ -46,7 +47,10 @@ class DetailFragment : Fragment() {
         val bufferedInputStream = BufferedInputStream(context?.openFileInput(image))
         val bitmap = BitmapFactory.decodeStream(bufferedInputStream)
         bufferedInputStream.close()
-        binding.imageView.setImageBitmap(bitmap)
+        Glide.with(requireContext())
+            .load(bitmap)
+            .error(android.R.drawable.ic_btn_speak_now)
+            .into(binding.imageView) //Glide
 
         binding.fab2.setOnClickListener{
             realm.executeTransaction { db: Realm ->
