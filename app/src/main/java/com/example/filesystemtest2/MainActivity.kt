@@ -73,56 +73,50 @@ class MainActivity : AppCompatActivity()  {
         }
         when (requestCode) {
             CATEGORY_CODE -> {
-                try { ByteArrayOutputStream().use { byteArrOutputStream ->
-                    val uri = resultData?.data
-                    // onDestroyのときに処理が破棄される？
-                    //GlobalScope.launch(Dispatchers.Default) {
-                        if (uri != null) {
-                            //一枚選択時の動作
-                            val inputStream = contentResolver?.openInputStream(uri)
-                            if (inputStream != null) saveImage(byteArrOutputStream, inputStream, 999)
-                        } else {
-                            //複数枚選択時の動作
-                            val clipData = resultData?.clipData
-                            val clipItemCount = clipData?.itemCount?.minus(1) //エラーになるので、数字を１減らす。
-                            for (i in 0..clipItemCount!!) {
-                                val item = clipData.getItemAt(i).uri
-                                val inputStream = contentResolver?.openInputStream(item)
-                                if (inputStream != null) saveImage(byteArrOutputStream, inputStream, i)
-                            }
-                        }
-                    //}
-                    Toast.makeText(this, "保存完了", Toast.LENGTH_LONG).show()
+                val uri = resultData?.data
+                // onDestroyのときに処理が破棄される？
+                //GlobalScope.launch(Dispatchers.Default) {
+                if (uri != null) {
+                    //一枚選択時の動作
+                    val inputStream = contentResolver?.openInputStream(uri)
+                    if (inputStream != null) saveImage( inputStream, 999)
+                } else {
+                    //複数枚選択時の動作
+                    val clipData = resultData?.clipData
+                    val clipItemCount = clipData?.itemCount?.minus(1) //エラーになるので、数字を１減らす。
+                    for (i in 0..clipItemCount!!) {
+                        val item = clipData.getItemAt(i).uri
+                        val inputStream = contentResolver?.openInputStream(item)
+                        if (inputStream != null) saveImage( inputStream, i)
+                    }
                 }
-                } catch (e: Exception) {
-                    println("エラー発生1")
-                }
+                //}
+                Toast.makeText(this, "保存完了", Toast.LENGTH_LONG).show()
             }
         }
     }
 
-  fun saveImage(byteArrOutputStream:ByteArrayOutputStream, inputStream:InputStream, int:Int) {
-        val date = Date()
-        val sdf = SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault())
-        val name = "${sdf.format(date)}_${int}.jpg"
-        val image = BitmapFactory.decodeStream(inputStream)
+  fun saveImage( inputStream:InputStream, int:Int) {
+      try {
+          ByteArrayOutputStream().use { byteArrOutputStream ->
+              val image = BitmapFactory.decodeStream(inputStream)
+              image.compress(Bitmap.CompressFormat.JPEG, 100, byteArrOutputStream)
+              val byte = byteArrOutputStream.toByteArray()
+              createDatabase(byte)
+              inputStream.close() //明示的に閉じる
+          }
+      }catch(e:Exception){
+          println("エラー発生")
+      }
+  }
 
-        try { openFileOutput(name, Context.MODE_PRIVATE).use { outStream ->
-            image.compress(Bitmap.CompressFormat.JPEG, 100, outStream)
-            outStream.write(byteArrOutputStream.toByteArray())
-            inputStream.close() //明示的に閉じる
-            createDatabase(name)
-        }
-        }catch(e : Exception){ println("エラー発生2") }
-    }
-
-    private fun createDatabase(name:String){
+    private fun createDatabase(byte:ByteArray){
         realm.executeTransaction { db: Realm ->
             val maxId = db.where<item>().max("id")
             val nextId : Long = (maxId?.toLong() ?: 0L) + 1L
             val item = db.createObject<item>(nextId)
             item.category = category[CATEGORY_CODE]
-            item.name = name
+            item.image = byte
             item.detail = ""
         }
     }

@@ -38,7 +38,7 @@
             android:id="@+id/action_detailFragment_to_listFragment2"
             app:destination="@id/listFragment" />
         <argument
-            android:name="image"
-            app:argType="string" />
+            android:name="id"
+            app:argType="long" />
     </fragment>
 </navigation>

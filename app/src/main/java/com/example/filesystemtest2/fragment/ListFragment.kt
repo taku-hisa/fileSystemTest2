@@ -3,6 +3,7 @@ package com.example.filesystemtest2.fragment
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.drawable.VectorDrawable
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -17,6 +18,11 @@ import com.example.filesystemtest2.database.itemAdapter
 import io.realm.Realm
 import io.realm.kotlin.where
 import java.io.BufferedInputStream
+import java.io.FileInputStream
+import java.io.InputStream
+import java.io.InputStreamReader
+import java.nio.ByteBuffer
+import java.util.*
 
 class ListFragment : Fragment() {
     private var _binding : FragmentListBinding? = null
@@ -42,15 +48,11 @@ class ListFragment : Fragment() {
         //選んだカテゴリの画像リストを表示する
         val category = args.category
         val items = realm.where<item>().equalTo("category", category).findAll()
+        val bitmapList = mutableListOf<Bitmap>()
         //画像の読込
-        val imageList = mutableListOf<Bitmap>()
         for(i in items) {
-            try { BufferedInputStream(context?.openFileInput(i.name)).use { bufferedInputStream ->
-                val itemImage = BitmapFactory.decodeStream(bufferedInputStream)
-                imageList.add(itemImage)
-                bufferedInputStream.close()
-            }
-            }catch(e : Exception){ println("エラー発生")}
+            val bitmap =BitmapFactory.decodeByteArray(i.image,0,i.image.size)
+            bitmapList.add(bitmap)
         }
 
         //アルゴリズムの修正が必要
@@ -63,10 +65,10 @@ class ListFragment : Fragment() {
                     else
                     -> GridLayoutManager(requireContext(), 4)
                 }
-            adapter = itemAdapter(context, imageList).apply{
+            adapter = itemAdapter(context, bitmapList).apply{
                 //画面遷移
                 setOnItemClickListener { position:Int ->
-                    val action = items[position]?.let { ListFragmentDirections.actionListFragmentToDetailFragment2( it.name) }
+                    val action = items[position]?.let { ListFragmentDirections.actionListFragmentToDetailFragment2( it.id) }
                     if (action != null) findNavController().navigate(action)
                 }
             }

@@ -1,5 +1,6 @@
 package com.example.filesystemtest2.fragment
 
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -39,22 +40,20 @@ class DetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         //選んだカテゴリの画像リストを表示する
-        val image = args.image
-        realm.executeTransaction{db:Realm->
-            val item = db.where<item>().equalTo("name",image).findFirst()
+        val id = args.id
+        realm.executeTransaction { db: Realm ->
+            val item = db.where<item>().equalTo("id", id).findFirst()
             binding.multiText.setText(item!!.detail)
+            val bitmap = BitmapFactory.decodeByteArray(item.image, 0, item.image.size)
+            Glide.with(requireContext())
+                    .load(bitmap)
+                    .error(android.R.drawable.ic_btn_speak_now)
+                    .into(binding.imageView) //Glide
         }
-        val bufferedInputStream = BufferedInputStream(context?.openFileInput(image))
-        val bitmap = BitmapFactory.decodeStream(bufferedInputStream)
-        bufferedInputStream.close()
-        Glide.with(requireContext())
-            .load(bitmap)
-            .error(android.R.drawable.ic_btn_speak_now)
-            .into(binding.imageView) //Glide
 
         binding.fab2.setOnClickListener{
             realm.executeTransaction { db: Realm ->
-                val item = db.where<item>().equalTo("name",image).findFirst()
+                val item = db.where<item>().equalTo("id",id).findFirst()
                 item?.detail = binding.multiText.text.toString()
                 Toast.makeText(requireContext(),"更新完了", Toast.LENGTH_LONG).show()
             }
