@@ -34,12 +34,14 @@ class itemAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         var imageResource = images[position] //リストを展開
+        //Glide
+        //ライブラリを使わなくても画像は表示できますが、メモリ管理などがシビア(小手先では解決不可能)で、表示が不安定なので使っています
         Glide.with(context)
             .load(imageResource)
             .error(android.R.drawable.ic_btn_speak_now)
-            .into(holder.image) //Glide
+            .into(holder.image)
         holder.itemView.setOnClickListener{
-            listener?.invoke(position)      //追加
+            listener?.invoke(position)      //クリック処理
         }
     }
 

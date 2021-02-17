@@ -34,10 +34,10 @@ class MainFragment : Fragment() {
         //カテゴリーをリスト表示する
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, category)
         binding.categoryList.adapter = adapter
-        binding.categoryList.setOnItemClickListener{parent,view,position,id->
-            val item = (view.findViewById<TextView>(android.R.id.text1)).text.toString()
-            val action = MainFragmentDirections.actionMainFragmentToListFragment2(item)
-            findNavController().navigate(action)
+        binding.categoryList.setOnItemClickListener{parent,view,position,id->  //ボタンを押されたとき
+            val item = (view.findViewById<TextView>(android.R.id.text1)).text.toString() //listviewの文字を取得
+            val action = MainFragmentDirections.actionMainFragmentToListFragment2(item) //listviewの文字をListFragment2へ投げる
+            findNavController().navigate(action) //画面遷移するおまじない
         }
     }
 

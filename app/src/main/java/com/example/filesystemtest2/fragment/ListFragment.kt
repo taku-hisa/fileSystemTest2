@@ -46,16 +46,16 @@ class ListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         //選んだカテゴリの画像リストを表示する
-        val category = args.category
-        val items = realm.where<item>().equalTo("category", category).findAll()
-        val bitmapList = mutableListOf<Bitmap>()
+        val category = args.category //safeargsの機能で、category:Stringを受け取る
+        val items = realm.where<item>().equalTo("category", category).findAll() //categoryのitemを検索する
+        val bitmapList = mutableListOf<Bitmap>() //リストの初期化
         //画像の読込
         for(i in items) {
-            val bitmap =BitmapFactory.decodeByteArray(i.image,0,i.image.size)
-            bitmapList.add(bitmap)
+            val bitmap =BitmapFactory.decodeByteArray(i.image,0,i.image.size) //検索結果からitem内のimage(画像)を復元する
+                                                                                     //byte型→bitmap ※保存時はbyte型、表示はbitmap型まで変換してください※
+            bitmapList.add(bitmap)//リストへ追加する
         }
 
-        //アルゴリズムの修正が必要
         binding.RecyclerView.apply {
             layoutManager =
                 when {
@@ -65,7 +65,7 @@ class ListFragment : Fragment() {
                     else
                     -> GridLayoutManager(requireContext(), 4)
                 }
-            adapter = itemAdapter(context, bitmapList).apply{
+            adapter = itemAdapter(context, bitmapList).apply{ //adapterへ画像リストを投げる
                 //画面遷移
                 setOnItemClickListener { position:Int ->
                     val action = items[position]?.let { ListFragmentDirections.actionListFragmentToDetailFragment2( it.id) }
